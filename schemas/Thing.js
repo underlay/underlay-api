@@ -38,12 +38,11 @@ const schema = {
 			/* An image of the item. */
 			type: 'string',
 			format: 'url',
-			amerberize: true,
+			amberize: true,
 		},
 		name: {
 			/* The name of the item. */
 			type: 'string',
-			idExists: { type: 'Organization' }
 		},
 		url: {
 			/* URL of the item. */

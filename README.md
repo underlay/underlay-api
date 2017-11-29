@@ -58,7 +58,7 @@ Every assertion must be of only a single type. When creating a new node, there i
 		},
 		{
 			type: 'Person',
-			birthDate: 1947-07-30T00:00:00+00:00,
+			birthDate: '1947-07-30T00:00:00+00:00',
 		}
 	]
 ]
@@ -75,7 +75,7 @@ This would return the following confirmed assertions:
 	{
 		identifier: '9872-d17s-s81j-1182',
 		type: 'Person',
-		birthDate: 1947-07-30T00:00:00+00:00,
+		birthDate: '1947-07-30T00:00:00+00:00',
 		assertionDate: '2017-11-29T14:45:48+00:00'
 	}
 ]
@@ -139,7 +139,7 @@ Some attributes within a given node schema are best represented by a relation. F
 	{
 		identifier: '9872-d17s-s81j-1182',
 		type: 'Person',
-		birthDate: 1947-07-30T00:00:00+00:00,
+		birthDate: '1947-07-30T00:00:00+00:00',
 		assertionDate: '2017-11-29T14:45:48+00:00'
 	},
 	{

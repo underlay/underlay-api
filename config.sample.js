@@ -1,0 +1,4 @@
+process.env.DATABASE_URL = '<POSTGRES_URI>';
+process.env.GRAPHENEDB_URL = '<GRAPHENE_URI>';
+process.env.AWS_ACCESS_KEY_ID = '<ACCESS_KEY_ID>';
+process.env.AWS_SECRET_ACCESS_KEY = '<SECRET_ACCESS_KEY>';

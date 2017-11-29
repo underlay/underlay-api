@@ -6,28 +6,34 @@ are listed as such
 
 The used schema syntax is defined by JSON Schema: http://json-schema.org/
 ---------- */
+import { properties as thingProperties } from './Thing';
+
+export const properties = {
+	...thingProperties,
+	birthDate: {
+		/* Date of birth. */
+		type: 'string',
+		format: 'date-time',
+	},
+	affiliation: {
+		/* An organization that this person is affiliated with.
+		For example, a school/university, a club, or a team. */
+		type: 'array',
+		uniqueItems: true,
+		items: {
+			type: 'string',
+			format: 'uuid',
+			idExists: { type: 'Organization' }
+		}
+	}
+};
 
 const schema = {
 	$id: 'Person',
 	$async: true,
 	type: 'object',
 	additionalProperties: false,
-	properties: {
-		birthDate: {
-			/* Date of birth. */
-			type: 'string',
-			format: 'date-time',
-		},
-		affiliation: {
-			/* An organization that this person is affiliated with.
-			For example, a school/university, a club, or a team.
-			This needs to be an array of IDs. A person can have
-			more than one organization */
-			type: 'string',
-			format: 'uuid',
-			idExists: { type: 'Organization' }
-		}
-	},
+	properties: properties,
 };
 
 export default schema;

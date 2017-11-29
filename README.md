@@ -22,15 +22,16 @@ An assertion can be made to:
 - A GET route that allows one to query or download valid and accepted Assertions sent to the particular underlay.
 
 ## Assertions
-Assertions are submitted as an array of JSON values. A single assertion must include a `type`. Valid types are listed below in the Schemas section. Assertions are used to create nodes within a graph. These nodes can have multiple schemas and the attributes associated with such schemas.
+Assertions are submitted as an array of JSON values. A single assertion must include a `type`. Valid types are listed below in the Schemas section. Assertions are used to create nodes within a graph. These nodes can have multiple schemas and the attributes associated with such schemas. A node must be created as a single schema. Once you have an identifier for a given node, you can specify additional schemas. 
 
 An underlay is expected to maintain a full list of all processed assertions (i.e. amberized, with ids and assertionDates).
 
 **New Node with single type**
+Every assertion must be of only a single type. Note, the type we are using, `Person` inherits the attributes of `Thing`. The attributes listed in the following assertion are `Thing` attributes even though we specify a type of `Person`. This is because of the inheritance of attributes. 
 ```javascript
 [
 	{
-		type: 'Thing',
+		type: 'Person',
 		name: 'Arnold Schwarzenegger',
 	}
 ]
@@ -39,16 +40,16 @@ This would return the following confirmed assertion:
 ```javascript
 [
 	{
-		identifier: '9872-d17s-s81j-1182',
-		type: 'Thing',
+		identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
+		type: 'Person',
 		name: 'Arnold Schwarzenegger',
 		assertionDate: '2017-11-29T14:45:48+00:00'
 	}
 ]
 ```
 
-**New Node with multiple types**
-Every assertion must be of only a single type. When creating a new node, there is no existing identifier with which to bind these multiple assertions. In this case, pass the multiple assertions within an array. A single identifier will be applied to them and they will be flattened when returned.
+<!-- **New Node with multiple types**
+ When creating a new node, there is no existing identifier with which to bind these multiple assertions. In this case, pass the multiple assertions within an array. A single identifier will be applied to them and they will be flattened when returned.
 ```javascript
 [
 	[
@@ -67,24 +68,24 @@ This would return the following confirmed assertions:
 ```javascript
 [
 	{
-		identifier: '9872-d17s-s81j-1182',
+		identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
 		type: 'Thing',
 		name: 'Arnold Schwarzenegger',
 		assertionDate: '2017-11-29T14:45:48+00:00'
 	},
 	{
-		identifier: '9872-d17s-s81j-1182',
+		identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
 		type: 'Person',
 		birthDate: '1947-07-30T00:00:00+00:00',
 		assertionDate: '2017-11-29T14:45:48+00:00'
 	}
 ]
-```
+``` -->
 **Update existing node**
 ```javascript
 [
 	{
-		identifier: '9872-d17s-s81j-1182',
+		identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
 		type: 'Person',
 		familyName: 'Schwarzenegger',
 	}
@@ -94,7 +95,7 @@ This would return the following confirmed assertion:
 ```javascript
 [
 	{
-		identifier: '9872-d17s-s81j-1182',
+		identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
 		type: 'Person',
 		familyName: 'Schwarzenegger',
 		assertionDate: '2017-11-29T14:45:48+00:00'
@@ -107,7 +108,7 @@ Note, that because we are updating an existing node, and we perform no amberizat
 ```javascript
 [
 	{
-		identifier: '9872-d17s-s81j-1182',
+		identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
 		type: 'Thing',
 		image: 'https://upload.wikimedia.org/wikipedia/commons/d/d4/Arnold_Schwarzenegger_February_2015.jpg',
 	}
@@ -117,7 +118,7 @@ This would return the following confirmed assertion:
 ```javascript
 [
 	{
-		identifier: '9872-d17s-s81j-1182',
+		identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
 		type: 'Thing',
 		image: 'https://underlaycdn.net/asndu1/sdjd831.jpg',
 		assertionDate: '2017-11-29T14:45:48+00:00'
@@ -131,19 +132,14 @@ Some attributes within a given node schema are best represented by a relation. F
 ```javascript
 [
 	{
-		identifier: '9872-d17s-s81j-1182',
-		type: 'Thing',
-		name: 'Arnold Schwarzenegger',
-		assertionDate: '2017-11-29T14:45:48+00:00'
-	},
-	{
-		identifier: '9872-d17s-s81j-1182',
+		identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
 		type: 'Person',
+		name: 'Arnold Schwarzenegger',
 		birthDate: '1947-07-30T00:00:00+00:00',
 		assertionDate: '2017-11-29T14:45:48+00:00'
 	},
 	{
-		identifier: '23f5-s351-762g-125f',
+		identifier: '225b5817-dfaf-4816-b93b-22b910528dy7',
 		type: 'Thing',
 		name: 'Austria',
 		assertionDate: '2017-11-29T14:45:48+00:00'
@@ -154,9 +150,9 @@ we can issue an assertion as follows:
 ```javascript
 [
 	{
-		identifier: '9872-d17s-s81j-1182',
+		identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
 		type: 'Person',
-		birthPlace: '23f5-s351-762g-125f'
+		birthPlace: '225b5817-dfaf-4816-b93b-22b910528dy7'
 	}
 ]
 ```
@@ -164,9 +160,9 @@ which would return:
 ```javascript
 [
 	{
-		identifier: '9872-d17s-s81j-1182',
+		identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
 		type: 'Person',
-		birthPlace: '23f5-s351-762g-125f',
+		birthPlace: '225b5817-dfaf-4816-b93b-22b910528dy7',
 		assertionDate: '2017-11-30T14:45:48+00:00'
 	}
 ]

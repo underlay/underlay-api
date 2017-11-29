@@ -6,22 +6,23 @@ are listed as such
 
 The used schema syntax is defined by JSON Schema: http://json-schema.org/
 ---------- */
+import { properties as thingProperties } from './Thing';
 
-const schema = {
-	$id: 'CreativeWork',
-	$async: true,
-	type: 'object',
-	additionalProperties: false,
-	properties: {
+export const properties = {
+		...thingProperties
 		author: {
 			/* The author of this content or rating. Please
 			note that author is special in that HTML 5
 			provides a special mechanism for indicating authorship
 			via the rel tag. That is equivalent to this and may
 			be used interchangeably. */
-			type: 'string',
-			format: 'uuid',
-			idExists: { type: ['Organization', 'Person'] }
+			type: 'array',
+			uniqueItems: true,
+			items: {
+				type: 'string',
+				format: 'uuid',
+				idExists: { type: ['Organization', 'Person'] }
+			}
 		},
 		datePublished: {
 			/* Date of first broadcast/publication. */
@@ -59,7 +60,14 @@ const schema = {
 			type: 'string',
 		},
 		
-	},
+	};
+
+const schema = {
+	$id: 'CreativeWork',
+	$async: true,
+	type: 'object',
+	additionalProperties: false,
+	properties: properties,
 };
 
 export default schema;

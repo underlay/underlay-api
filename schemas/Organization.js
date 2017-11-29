@@ -6,22 +6,26 @@ are listed as such
 
 The used schema syntax is defined by JSON Schema: http://json-schema.org/
 ---------- */
+import { properties as thingProperties } from './Thing';
+
+export const properties = {
+	...thingProperties
+	foundingDate: {
+		/* The date that this organization was founded. */
+		type: 'string',
+		format: 'date-time',
+	},
+	legalName: {
+		/* The official name of the organization, e.g. the registered company name. */
+		type: 'string',
+	},
+};
 
 const schema = {
 	$id: 'Organization',
 	type: 'object',
 	additionalProperties: false,
-	properties: {
-		foundingDate: {
-			/* The date that this organization was founded. */
-			type: 'string',
-			format: 'date-time',
-		},
-		legalName: {
-			/* The official name of the organization, e.g. the registered company name. */
-			type: 'string',
-		},
-	},
+	properties: properties,
 };
 
 export default schema;

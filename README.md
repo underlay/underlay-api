@@ -22,7 +22,9 @@ An assertion can be made to:
 - A GET route that allows one to query or download valid and accepted Assertions sent to the particular underlay.
 
 ## Assertions
-Assertions are submitted as an array of JSON values. A single assertion must include a `type`. Valid types are listed below.
+Assertions are submitted as an array of JSON values. A single assertion must include a `type`. Valid types are listed below in the Schemas section. Assertions are used to create nodes within a graph. These nodes can have multiple schemas and the attributes associated with such schemas.
+
+An underlay is expected to maintain a full list of all processed assertions (i.e. amberized, with ids and assertionDates).
 
 **New Node with single type**
 ```javascript
@@ -174,12 +176,7 @@ which would return:
 
 Every node in an underlay can be described by one or more schemas. The used schemas use schema.org standards as a baseline. Unless otherwise noted, all submitted assertions and attributes must comply with the approved schema.org schemas. A list of functioning schemas in this Underlay are provided below:
 
-- [Thing](/schemas/Thing.md)
-**Additional Fields:**
-assertionDate: DateTime
-	- [Person](https://schema.org/Person)
-	- [Organization](https://schema.org/Organization)
-	- [Creative Work](https://schema.org/CreativeWork)
-		- [Article](https://schema.org/Article)
-		**Additional Fields:**
-		CPC Code: Text
+- [Thing](/schemas/Thing.js)
+	- [Person](/schemas/Person.js)
+	- [Organization](/schemas/Organization.js)
+	- [Creative Work](/schemas/Creative.js)

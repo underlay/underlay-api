@@ -1,0 +1,51 @@
+{
+  "name": "underlay-api",
+  "description": "API for PubPub",
+  "version": "4.0.0",
+  "author": "Travis Rich <trich@media.mit.edu>",
+  "license": "CC0",
+  "main": "api.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/underlay/underlay-api.git"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon api.js"
+  },
+  "dependencies": {
+    "ajv": "^6.0.0-rc.0",
+    "ajv-async": "^0.1.1",
+    "babel-core": "^6.13.2",
+    "babel-eslint": "^7.1.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-react-display-name": "^6.8.0",
+    "babel-plugin-transform-runtime": "^6.12.0",
+    "babel-preset-es2015": "^6.13.2",
+    "babel-preset-stage-0": "^6.5.0",
+    "babel-register": "^6.11.6",
+    "bluebird": "^3.4.1",
+    "body-parser": "^1.18.1",
+    "compression": "^1.7.0",
+    "cookie-parser": "^1.4.3",
+    "cors": "^2.8.1",
+    "eslint": "^4.6.1",
+    "eslint-config-airbnb": "^15.0.1",
+    "eslint-loader": "^1.6.1",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^5.1.1",
+    "eslint-plugin-react": "^7.3.0",
+    "express": "^4.14.0",
+    "express-session": "^1.14.1",
+    "newrelic": "^2.2.1",
+    "nodemon": "^1.12.0",
+    "request": "^2.79.0",
+    "request-promise": "^4.1.1",
+    "uuid": "^3.1.0"
+  },
+  "engines": {
+    "node": "8.2.1"
+  }
+}

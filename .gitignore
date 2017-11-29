@@ -1,0 +1,9 @@
+node_modules
+.DS_Store
+.atomignore
+.info
+*.swp
+*.swo
+npm-debug.log
+config.js
+migrate

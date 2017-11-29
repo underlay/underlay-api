@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+import Promise from 'bluebird';
 import Ajv from 'ajv';
 import setupAsync from 'ajv-async';
 import uuidv4 from 'uuid/v4';
@@ -55,28 +56,50 @@ const schemaSpec = ajv.addKeyword('idExists', {
 .addSchema(CreativeWork, 'CreativeWork');
 
 app.post('/assertions', (req, res)=> {
-	if (!req.body.type) {
+
+	console.time('PostAssertions');
+	const assertions = req.body;
+	const assertionDate = new Date();
+	const allHaveType = assertions.reduce((prev, curr)=> {
+		if (!curr.type) { return false; }
+		return prev;
+	}, true);
+	if (!allHaveType) {
 		return res.status(400).json('Type required');
 	}
 
-	console.time('PostAssertions');
-	const assertionDate = new Date();
-	const assertionData = {
-		...req.body,
-		identifier: req.body.identifier || uuidv4(),
-	};
+	const allHaveIdentifier = assertions.reduce((prev, curr)=> {
+		/* If there is no identifier, and it is not of type Thing (i.e. a new node),
+		return false; */
+		if (!curr.identifier && curr.type !== 'Thing') { return false; }
+		return prev;
+	}, true);
+	if (!allHaveIdentifier) {
+		return res.status(400).json('Identifier required');
+	}
 
-	delete assertionData.type;
+	const validations = assertions.map((item)=> {
+		const nodeData = { ...item };
+		if (item.type !== 'Thing') {
+			delete nodeData.identifier;
+		}
+		delete nodeData.type;
+		return schemaSpec.validate(item.type, nodeData);
+	});
 
-	return schemaSpec.validate(req.body.type, assertionData)
+	return Promise.all(validations)
+	// schemaSpec.validate(req.body.type, assertionData)
 	.then((data)=> {
-		console.timeEnd('PostAssertions');
-		return res.status(201).json({
-			...data,
-			type: req.body.type,
-			assertionDate: assertionDate,
-
+		const results = data.map((item, index)=> {
+			return {
+				...item,
+				type: assertions[index].type,
+				identifier: assertions[index].identifier || uuidv4(),
+				assertionDate: assertionDate,
+			};
 		});
+		console.timeEnd('PostAssertions');
+		return res.status(201).json(results);
 	})
 	.catch((err)=> {
 		console.timeEnd('PostAssertions');

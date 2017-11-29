@@ -9,6 +9,7 @@ The used schema syntax is defined by JSON Schema: http://json-schema.org/
 
 const schema = {
 	$id: 'CreativeWork',
+	$async: true,
 	type: 'object',
 	additionalProperties: false,
 	properties: {

@@ -113,6 +113,12 @@ app.post('/assertions', (req, res)=> {
 				ON MATCH SET ${createString}
 			`;
 		}, '');
+		// TODO: We can merge to ensure we create relationships that are unique as well
+		// http://neo4j.com/docs/developer-manual/current/cypher/clauses/merge/
+		// I'm not quite sure how we identify which assertions strings are relationships. Is that something we should tip off in the schema?
+		// If I see a uuid (or array of uuids) that aren't the identifier, do I assume that's a relationship?
+		// Do we need to enfore type, or can we just set it to :Thing?
+
 		// console.log(cypherStatement);
 		return Promise.all([results, graphSession.run(cypherStatement)]);
 	})

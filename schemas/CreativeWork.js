@@ -9,7 +9,7 @@ The used schema syntax is defined by JSON Schema: http://json-schema.org/
 import { properties as thingProperties } from './Thing';
 
 export const properties = {
-		...thingProperties
+		...thingProperties,
 		author: {
 			/* The author of this content or rating. Please
 			note that author is special in that HTML 5
@@ -68,6 +68,7 @@ const schema = {
 	type: 'object',
 	additionalProperties: false,
 	properties: properties,
+	cypherLabels: ':Thing:CreativeWork',
 };
 
 export default schema;

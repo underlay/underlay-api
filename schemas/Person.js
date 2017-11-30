@@ -34,6 +34,7 @@ const schema = {
 	type: 'object',
 	additionalProperties: false,
 	properties: properties,
+	cypherLabels: ':Thing:Person',
 };
 
 export default schema;

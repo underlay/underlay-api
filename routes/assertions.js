@@ -11,6 +11,9 @@ import Person from '../schemas/Person';
 import Organization from '../schemas/Organization';
 import CreativeWork from '../schemas/CreativeWork';
 
+import { Assertion } from '../sqldb';
+import { graphSession } from '../graphdb';
+
 function checkIdExists(schema, data) {
 	// return new Promise((resolve)=> {
 	// 	setTimeout(()=> {
@@ -56,8 +59,8 @@ const schemaSpec = ajv.addKeyword('idExists', {
 .addSchema(CreativeWork, 'CreativeWork');
 
 app.post('/assertions', (req, res)=> {
-
 	console.time('PostAssertions');
+
 	const assertions = req.body;
 	const assertionDate = new Date();
 	const allHaveType = assertions.reduce((prev, curr)=> {
@@ -68,36 +71,52 @@ app.post('/assertions', (req, res)=> {
 		return res.status(400).json('Type required');
 	}
 
-	const allHaveIdentifier = assertions.reduce((prev, curr)=> {
-		/* If there is no identifier, and it is not of type Thing (i.e. a new node),
-		return false; */
-		if (!curr.identifier && curr.type !== 'Thing') { return false; }
-		return prev;
-	}, true);
-	if (!allHaveIdentifier) {
-		return res.status(400).json('Identifier required');
-	}
-
-	const validations = assertions.map((item)=> {
-		const nodeData = { ...item };
-		if (item.type !== 'Thing') {
-			delete nodeData.identifier;
-		}
+	const validations = assertions.map((item, index)=> {
+		const nodeData = {
+			...item,
+			identifier: assertions[index].identifier || uuidv4()
+		};
 		delete nodeData.type;
 		return schemaSpec.validate(item.type, nodeData);
 	});
 
 	return Promise.all(validations)
-	// schemaSpec.validate(req.body.type, assertionData)
 	.then((data)=> {
 		const results = data.map((item, index)=> {
 			return {
 				...item,
 				type: assertions[index].type,
-				identifier: assertions[index].identifier || uuidv4(),
 				assertionDate: assertionDate,
 			};
 		});
+		const sequelizeObjects = results.map((item)=> {
+			return {
+				assertion: item,
+				nodeId: item.identifier,
+				createdAt: assertionDate,
+				modifiedAt: assertionDate,
+			};
+		});
+		return Promise.all([results, Assertion.bulkCreate(sequelizeObjects)]);
+	})
+	.then(([results])=> {
+		const cypherStatement = results.reduce((prev, curr, index)=> {
+			const createString = Object.keys(curr).reduce((prevString, currKey)=> {
+				if (currKey === 'type') { return prevString; }
+				if (currKey === 'assertionDate') { return prevString; }
+				const commaSpot = prevString ? ',' : '';
+				return `${prevString}${commaSpot} item${index}.${currKey} = "${curr[currKey]}"`;
+			}, '');
+			return `${prev}
+				MERGE (item${index}${schemaSpec._schemas[curr.type].schema.cypherLabels} { identifier: "${curr.identifier}" })
+				ON CREATE SET ${createString}
+				ON MATCH SET ${createString}
+			`;
+		}, '');
+		// console.log(cypherStatement);
+		return Promise.all([results, graphSession.run(cypherStatement)]);
+	})
+	.then(([results])=> {
 		console.timeEnd('PostAssertions');
 		return res.status(201).json(results);
 	})

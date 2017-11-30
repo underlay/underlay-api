@@ -9,7 +9,7 @@ The used schema syntax is defined by JSON Schema: http://json-schema.org/
 import { properties as thingProperties } from './Thing';
 
 export const properties = {
-	...thingProperties
+	...thingProperties,
 	foundingDate: {
 		/* The date that this organization was founded. */
 		type: 'string',
@@ -26,6 +26,7 @@ const schema = {
 	type: 'object',
 	additionalProperties: false,
 	properties: properties,
+	cypherLabels: ':Thing:Organization',
 };
 
 export default schema;

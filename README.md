@@ -186,7 +186,6 @@ Relationships can themselves have attributes. If instead of a uuid string, an ob
 }
 ```
 Currently, the only allowed property is `removed`. The `remove` property is used in place of deleting a relationship (just as it is for nodes).
-In the event that a relationship should be removed, an assertion can be issued with `removeRelations: true`. This will append a `removed: true` property to the relation in the graph.
 
 To remove a relationship, the following assertion could be submitted:
 ```javascript

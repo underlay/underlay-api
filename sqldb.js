@@ -24,8 +24,9 @@ const id = {
 
 const Assertion = sequelize.define('Assertion', {
 	id: id,
-	assertion: { type: Sequelize.JSONB },
-	nodeId: { type: Sequelize.UUID },
+	assertion: { type: Sequelize.JSONB, allowNull: false },
+	nodeId: { type: Sequelize.UUID, allowNull: false },
+	nodeType: { type: Sequelize.TEXT, allowNull: false },
 });
 
 const User = sequelize.define('User', {

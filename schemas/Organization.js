@@ -23,6 +23,7 @@ export const properties = {
 
 const schema = {
 	$id: 'Organization',
+	$async: true,
 	type: 'object',
 	additionalProperties: false,
 	properties: properties,

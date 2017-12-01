@@ -1,21 +1,23 @@
 /* eslint-disable no-param-reassign */
+/* eslint-disable max-len */
 import Promise from 'bluebird';
 import Ajv from 'ajv';
 import setupAsync from 'ajv-async';
 import uuidv4 from 'uuid/v4';
 import app from '../server';
 import amberizeFile from '../utilities/amberizeFile';
+import { Assertion } from '../sqldb';
+import { graphSession } from '../graphdb';
 
 import Thing from '../schemas/Thing';
 import Person from '../schemas/Person';
 import Organization from '../schemas/Organization';
 import CreativeWork from '../schemas/CreativeWork';
 
-import { Assertion } from '../sqldb';
-import { graphSession } from '../graphdb';
-
 function checkIdExists(schema, data) {
 	/* Ensure that a node with the given type and identifier exists */
+	// TODO: Have to be able to check for arrays of types. Some 
+	// relations can point to multiple schema types.
 	return graphSession.run(`MATCH (n:${schema.type}) WHERE n.identifier = "${data}" RETURN n.identifier`)
 	.then((results)=> {
 		return !!results.records.length;
@@ -92,7 +94,7 @@ app.post('/assertions', (req, res)=> {
 			};
 		});
 
-		/* Create the bulk cypher statement by iterating over each assertion */
+		/* Create a bulk cypher statement by iterating over each assertion */
 		const cypherStatement = results.reduce((prev, currAssertion, index)=> {
 			const schemaDef = schemaSpec._schemas[currAssertion.type].schema;
 			const schemaProperties = schemaDef.properties;
@@ -120,32 +122,47 @@ app.post('/assertions', (req, res)=> {
 				return `${prevString}${commaSpot} item${index}.${currKey} = "${currAssertion[currKey]}"`;
 			}, '');
 
-			/* Create the cypher statement that will set all of the relationships defined in the assertion */
-			const relationshipSetString = relationships.reduce((prevString, currKey)=> {
-				const relationshipType = schemaSpec._schemas[schemaProperties[currKey].items.idExists.type].schema.cypherLabels;
-				let currString;
+			/* Create the cypher statement that will set all
+			of the relationships defined in the assertion */
+			const relationshipSetString = '';
+			// const relationshipSetString = relationships.reduce((prevString, currKey)=> {
+			// 	const relationshipType = schemaSpec._schemas[schemaProperties[currKey].items.idExists.type].schema.cypherLabels;
+			// 	let currString;
 
-				/* If there is only one uuid, simply create the set statement
-				If there is an array of uuids, iterate over each to generate set statement */
-				if (typeof currAssertion[currKey] === 'string') {
-					currString = `
-						MATCH (from${schemaDef.cypherLabels} { identifier: '${currAssertion.identifier}' }),(to${relationshipType} { identifier: '${currAssertion[currKey]}' })
-						MERGE (from)-[r:${currKey}]->(to)
-					`;
-				} else {
-					currString = currAssertion[currKey].reduce((prevKeyString, currKeyIdentifier, currKeyIndex)=> {
-						return `${prevKeyString}
-							${prevKeyString ? 'WITH *' : ''}
-							MATCH (from${currKeyIndex}${schemaDef.cypherLabels} { identifier: '${currAssertion.identifier}' }),(to${currKeyIndex}${relationshipType} { identifier: '${currKeyIdentifier}' })
-							MERGE (from${currKeyIndex})-[r${currKeyIndex}:${currKey}]->(to${currKeyIndex})
-						`;
-					}, '');
-				}
+			// 	/* If there is only one uuid, simply create the set statement
+			// 	If there is an array of uuids, iterate over each to generate set statement */
+			// 	if (typeof currAssertion[currKey] === 'string') {
+			// 		currString = `
+			// 			MATCH (from${schemaDef.cypherLabels} { identifier: '${currAssertion.identifier}' }),(to${relationshipType} { identifier: '${currAssertion[currKey]}' })
+			// 			MERGE (from)-[r:${currKey}]->(to)
+			// 		`;
+			// 	} else if (typeof currAssertion[currKey] === 'object' && !Array.isArray(currAssertion[currKey])) {
+			// 		/* It is an object and not an array. */
+			// 		const destinationIdentifier = currAssertion[currKey].identifier;
+			// 		const relationshipPropertiesSetString = Object.keys(currAssertion[currKey]).reduce((prevRelationString, currRelationKey)=> {
+			// 			if (currRelationKey === 'identifier') { return prevRelationString; }
+			// 			const commaSpot = prevRelationString ? ',' : '';
+			// 			return `${prevRelationString}${commaSpot} r.${currRelationKey} = "${currAssertion[currKey][currRelationKey]}"`;
+			// 		}, '');
+			// 		currString = `
+			// 			MATCH (from${schemaDef.cypherLabels} { identifier: '${currAssertion.identifier}' }),(to${relationshipType} { identifier: '${destinationIdentifier}' })
+			// 			MERGE (from)-[r:${currKey}]->(to)
+			// 			SET ${relationshipPropertiesSetString}
+			// 		`;
+			// 	} else {
+			// 		currString = currAssertion[currKey].reduce((prevKeyString, currKeyIdentifier, currKeyIndex)=> {
+			// 			return `${prevKeyString}
+			// 				${prevKeyString ? 'WITH *' : ''}
+			// 				MATCH (from${currKeyIndex}${schemaDef.cypherLabels} { identifier: '${currAssertion.identifier}' }),(to${currKeyIndex}${relationshipType} { identifier: '${currKeyIdentifier}' })
+			// 				MERGE (from${currKeyIndex})-[r${currKeyIndex}:${currKey}]->(to${currKeyIndex})
+			// 			`;
+			// 		}, '');
+			// 	}
 
-				return `${prevString}
-					${currString}
-				`;
-			}, '');
+			// 	return `${prevString}
+			// 		${currString}
+			// 	`;
+			// }, '');
 
 			return `${prev}
 				MERGE (item${index}${schemaDef.cypherLabels} { identifier: "${currAssertion.identifier}" })
@@ -156,8 +173,8 @@ app.post('/assertions', (req, res)=> {
 			`;
 		}, '');
 		// TODO: We don't have a clean way of deleting relationships (or at least marking them inactive)
-		// TODO: What if somebody submits an assertion providing their own identifier. 
-		// At the moment, we'll just take it and create - but do we want to allow people 
+		// TODO: What if somebody submits an assertion providing their own identifier.
+		// At the moment, we'll just take it and create - but do we want to allow people
 		// to submit their own uuids?
 
 		/* Return the results and run the cypher statement to update the graph db */

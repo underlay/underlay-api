@@ -168,6 +168,54 @@ which would return:
 ]
 ```
 
+### Relationship Attributes
+Relationships can themselves have attributes. If instead of a uuid string, an object is provided, the key:value pairs of that object will be assigned to the resulting relationship. This object must have at least an `identifier` key. The following result in identical behavior.
+```javascript
+{
+	identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
+	type: 'Person',
+	birthPlace: '225b5817-dfaf-4816-b93b-22b910528dy7',
+}
+<!-- is the same as -->
+{
+	identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
+	type: 'Person',
+	birthPlace: {
+		identifier: '225b5817-dfaf-4816-b93b-22b910528dy7'
+	}
+}
+```
+Currently, the only allowed property is `removed`. The `remove` property is used in place of deleting a relationship (just as it is for nodes).
+In the event that a relationship should be removed, an assertion can be issued with `removeRelations: true`. This will append a `removed: true` property to the relation in the graph.
+
+To remove a relationship, the following assertion could be submitted:
+```javascript
+[
+	{
+		identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
+		type: 'Person',
+		birthPlace: {
+			identifier: '225b5817-dfaf-4816-b93b-22b910528dy7',
+			removed: true
+		}
+	}
+]
+```
+which would return:
+```javascript
+[
+	{
+		identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
+		type: 'Person',
+		birthPlace: {
+			identifier: '225b5817-dfaf-4816-b93b-22b910528dy7',
+			removed: true
+		}
+		assertionDate: '2017-11-30T16:45:48+00:00'
+	}
+]
+```
+
 ## Schemas
 
 Every node in an underlay can be described by one or more schemas. The used schemas use schema.org standards as a baseline. Unless otherwise noted, all submitted assertions and attributes must comply with the approved schema.org schemas. A list of functioning schemas in this Underlay are provided below:

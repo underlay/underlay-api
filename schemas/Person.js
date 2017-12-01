@@ -34,6 +34,7 @@ const schema = {
 	type: 'object',
 	additionalProperties: false,
 	properties: properties,
+	// TODO: Is there a way to programattically import the thing at top and generate the label here?
 	cypherLabels: ':Thing:Person',
 };
 

@@ -39,6 +39,11 @@ export const properties = {
 		/* The name of the item. */
 		type: 'string',
 	},
+	removed: {
+		/* Whether the item is marked as removed. Used as
+		an alternative to deleting nodes */
+		type: 'boolean',
+	},
 	url: {
 		/* URL of the item. */
 		type: 'string',

@@ -21,9 +21,9 @@ export const properties = {
 		type: 'array',
 		uniqueItems: true,
 		items: {
-			type: 'string',
-			format: 'uuid',
-			idExists: { type: 'Organization' }
+			// type: 'string',
+			type: ['string', 'object'],
+			identifierIsValid: { type: 'Organization' }
 		}
 	}
 };

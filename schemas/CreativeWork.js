@@ -21,7 +21,7 @@ export const properties = {
 		items: {
 			type: 'string',
 			format: 'uuid',
-			idExists: { type: ['Organization', 'Person'] }
+			identifierIsValid: { type: ['Organization', 'Person'] }
 		}
 	},
 	datePublished: {

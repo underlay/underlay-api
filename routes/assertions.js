@@ -14,11 +14,21 @@ import Person from '../schemas/Person';
 import Organization from '../schemas/Organization';
 import CreativeWork from '../schemas/CreativeWork';
 
-function checkIdExists(schema, data) {
+function validateIdentifier(schema, data) {
 	/* Ensure that a node with the given type and identifier exists */
-	// TODO: Have to be able to check for arrays of types. Some 
+	// TODO: Have to be able to check for arrays of types. Some
 	// relations can point to multiple schema types.
-	return graphSession.run(`MATCH (n:${schema.type}) WHERE n.identifier = "${data}" RETURN n.identifier`)
+
+	/* Regex from https://github.com/epoberezkin/ajv/blob/4d76c6fb813b136b6ec4fe74990bc97233d75dea/lib/compile/formats.js#L18 */
+	const uuidRegex = /^(?:urn:uuid:)?[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
+	const identifier = typeof data === 'string' ? data : data.identifier;
+	const validUUID = uuidRegex.test(identifier);
+
+	if (!validUUID) {
+		return new Promise((resolve)=> { resolve(false); });
+	}
+
+	return graphSession.run(`MATCH (n:${schema.type}) WHERE n.identifier = "${identifier}" RETURN n.identifier`)
 	.then((results)=> {
 		return !!results.records.length;
 	})
@@ -43,9 +53,9 @@ const ajv = setupAsync(new Ajv({
 	allErrors: true,
 }));
 
-const schemaSpec = ajv.addKeyword('idExists', {
+const schemaSpec = ajv.addKeyword('identifierIsValid', {
 	async: true,
-	validate: checkIdExists
+	validate: validateIdentifier
 })
 .addKeyword('amberize', {
 	async: true,

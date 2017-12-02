@@ -16,8 +16,6 @@ import CreativeWork from '../schemas/CreativeWork';
 
 function validateIdentifier(schema, data) {
 	/* Ensure that a node with the given type and identifier exists */
-	// TODO: Have to be able to check for arrays of types. Some
-	// relations can point to multiple schema types.
 
 	/* Regex from https://github.com/epoberezkin/ajv/blob/4d76c6fb813b136b6ec4fe74990bc97233d75dea/lib/compile/formats.js#L18 */
 	const uuidRegex = /^(?:urn:uuid:)?[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
@@ -28,9 +26,20 @@ function validateIdentifier(schema, data) {
 		return new Promise((resolve)=> { resolve(false); });
 	}
 
-	return graphSession.run(`MATCH (n:${schema.type}) WHERE n.identifier = "${identifier}" RETURN n.identifier`)
+	return graphSession.run(`MATCH (n:Thing) WHERE n.identifier = "${identifier}" RETURN labels(n)`)
 	.then((results)=> {
-		return !!results.records.length;
+		/* If no resuls were found, return false */
+		if (!results.records.length) { return false; }
+
+		/* If the found node type is not listed as an
+		accepteddestinationnode type, return false */
+		const labelMatches = results.records[0].get('labels(n)').some((item)=> {
+			return schema.type.includes(item);
+		});
+		if (!labelMatches) { return false; }
+
+		/* If all the checks have passed, return true */
+		return true;
 	})
 	.catch((err)=> {
 		console.log('Error checking for identifier ', err);

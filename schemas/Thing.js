@@ -28,7 +28,7 @@ export const properties = {
 		/* Unique, immutable identifier for a node. Conforms to UUID spec. */
 		type: 'string',
 		format: 'uuid',
-		identifierIsValid: { type: 'Thing' }
+		identifierIsValid: { type: ['Thing'] }
 	},
 	image: {
 		/* An image of the item. */

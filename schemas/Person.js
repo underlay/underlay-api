@@ -23,7 +23,7 @@ export const properties = {
 		items: {
 			// type: 'string',
 			type: ['string', 'object'],
-			identifierIsValid: { type: 'Organization' }
+			identifierIsValid: { type: ['Organization'] }
 		}
 	}
 };

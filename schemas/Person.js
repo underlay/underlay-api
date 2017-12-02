@@ -6,10 +6,13 @@ are listed as such
 
 The used schema syntax is defined by JSON Schema: http://json-schema.org/
 ---------- */
-import { properties as thingProperties } from './Thing';
+import thingData from './Thing';
 
-export const properties = {
-	...thingProperties,
+const schemaName = 'Person';
+const cypherLabels = `${thingData.cypherLabels}:${schemaName}`;
+
+const properties = {
+	...thingData.properties,
 	birthDate: {
 		/* Date of birth. */
 		type: 'string',
@@ -21,21 +24,14 @@ export const properties = {
 		type: 'array',
 		uniqueItems: true,
 		items: {
-			// type: 'string',
 			type: ['string', 'object'],
 			identifierIsValid: { type: ['Organization'] }
 		}
 	}
 };
 
-const schema = {
-	$id: 'Person',
-	$async: true,
-	type: 'object',
-	additionalProperties: false,
-	properties: properties,
-	// TODO: Is there a way to programattically import the thing at top and generate the label here?
-	cypherLabels: ':Thing:Person',
+export default {
+	schemaName,
+	cypherLabels,
+	properties
 };
-
-export default schema;

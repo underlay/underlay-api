@@ -6,8 +6,10 @@ are listed as such
 
 The used schema syntax is defined by JSON Schema: http://json-schema.org/
 ---------- */
+const schemaName = 'Thing';
+const cypherLabels = `:${schemaName}`;
 
-export const properties = {
+const properties = {
 	alternateName: {
 		/* An alias for the item. */
 		type: 'string'
@@ -52,13 +54,8 @@ export const properties = {
 	},
 };
 
-const schema = {
-	$id: 'Thing',
-	$async: true,
-	type: 'object',
-	additionalProperties: false,
-	properties: properties,
-	cypherLabels: ':Thing',
+export default {
+	schemaName,
+	cypherLabels,
+	properties
 };
-
-export default schema;

@@ -6,10 +6,13 @@ are listed as such
 
 The used schema syntax is defined by JSON Schema: http://json-schema.org/
 ---------- */
-import { properties as thingProperties } from './Thing';
+import thingData from './Thing';
 
-export const properties = {
-	...thingProperties,
+const schemaName = 'Organization';
+const cypherLabels = `${thingData.cypherLabels}:${schemaName}`;
+
+const properties = {
+	...thingData.properties,
 	foundingDate: {
 		/* The date that this organization was founded. */
 		type: 'string',
@@ -21,13 +24,8 @@ export const properties = {
 	},
 };
 
-const schema = {
-	$id: 'Organization',
-	$async: true,
-	type: 'object',
-	additionalProperties: false,
-	properties: properties,
-	cypherLabels: ':Thing:Organization',
+export default {
+	schemaName,
+	cypherLabels,
+	properties
 };
-
-export default schema;

@@ -8,11 +8,7 @@ import app from '../server';
 import amberizeFile from '../utilities/amberizeFile';
 import { Assertion } from '../sqldb';
 import { graphSession } from '../graphdb';
-
-import Thing from '../schemas/Thing';
-import Person from '../schemas/Person';
-import Organization from '../schemas/Organization';
-import CreativeWork from '../schemas/CreativeWork';
+import schemas from '../schemas/index';
 
 function validateIdentifier(schema, data) {
 	/* Ensure that a node with the given type and identifier exists */
@@ -79,11 +75,13 @@ const schemaSpec = ajv.addKeyword('identifierIsValid', {
 .addKeyword('amberize', {
 	async: true,
 	validate: amberize
-})
-.addSchema(Thing, 'Thing')
-.addSchema(Person, 'Person')
-.addSchema(Organization, 'Organization')
-.addSchema(CreativeWork, 'CreativeWork');
+});
+
+/* There is currently a bug that makes this not chainable.
+If accepted, we can chain this above. Follow this PR:
+https://github.com/epoberezkin/ajv/pull/640
+*/
+schemaSpec.addSchema(schemas);
 
 app.post('/assertions', (req, res)=> {
 	console.time('PostAssertions');

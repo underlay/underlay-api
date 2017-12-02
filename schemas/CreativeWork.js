@@ -6,10 +6,13 @@ are listed as such
 
 The used schema syntax is defined by JSON Schema: http://json-schema.org/
 ---------- */
-import { properties as thingProperties } from './Thing';
+import thingData from './Thing';
 
-export const properties = {
-	...thingProperties,
+const schemaName = 'CreativeWork';
+const cypherLabels = `${thingData.cypherLabels}:${schemaName}`;
+
+const properties = {
+	...thingData.properties,
 	author: {
 		/* The author of this content or rating. Please
 		note that author is special in that HTML 5
@@ -19,8 +22,7 @@ export const properties = {
 		type: 'array',
 		uniqueItems: true,
 		items: {
-			type: 'string',
-			format: 'uuid',
+			type: ['string', 'object'],
 			identifierIsValid: { type: ['Organization', 'Person'] }
 		}
 	},
@@ -53,22 +55,17 @@ export const properties = {
 		type: 'string',
 	},
 
-	/* ----------------------- */
-	/* Non-Schema.org attribute*/
-	/* ----------------------- */
+	/* ------------------------ */
+	/* Non-Schema.org attribute */
+	/* ------------------------ */
 	cpcCode: {
 		/* The generated CPC code for this CreativeWork. */
 		type: 'string',
 	},
 };
 
-const schema = {
-	$id: 'CreativeWork',
-	$async: true,
-	type: 'object',
-	additionalProperties: false,
-	properties: properties,
-	cypherLabels: ':Thing:CreativeWork',
+export default {
+	schemaName,
+	cypherLabels,
+	properties
 };
-
-export default schema;

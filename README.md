@@ -26,7 +26,7 @@ Assertions are submitted as an array of JSON values. A single assertion must inc
 
 An underlay is expected to maintain a full list of all processed assertions (i.e. amberized, with ids and assertionDates).
 
-**New Node with single type**
+**New Node**
 Every assertion must be of only a single type. Note, the type we are using, `Person` inherits the attributes of `Thing`. The attributes listed in the following assertion are `Thing` attributes even though we specify a type of `Person`. This is because of the inheritance of attributes. 
 ```javascript
 [
@@ -48,40 +48,8 @@ This would return the following confirmed assertion:
 ]
 ```
 
-<!-- **New Node with multiple types**
- When creating a new node, there is no existing identifier with which to bind these multiple assertions. In this case, pass the multiple assertions within an array. A single identifier will be applied to them and they will be flattened when returned.
-```javascript
-[
-	[
-		{
-			type: 'Thing',
-			name: 'Arnold Schwarzenegger',
-		},
-		{
-			type: 'Person',
-			birthDate: '1947-07-30T00:00:00+00:00',
-		}
-	]
-]
-```
-This would return the following confirmed assertions:
-```javascript
-[
-	{
-		identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
-		type: 'Thing',
-		name: 'Arnold Schwarzenegger',
-		assertionDate: '2017-11-29T14:45:48+00:00'
-	},
-	{
-		identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
-		type: 'Person',
-		birthDate: '1947-07-30T00:00:00+00:00',
-		assertionDate: '2017-11-29T14:45:48+00:00'
-	}
-]
-``` -->
 **Update existing node**
+To update an existing node, provide the existing node's identifier. If an identifier is provided that does not match an existing node, an error will be thrown.
 ```javascript
 [
 	{

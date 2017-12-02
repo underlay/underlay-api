@@ -50,7 +50,6 @@ function amberize(schema, data, parentSchema, currentDataPath, parentData, prope
 }
 
 function generateSetString(itemName, attributesObject) {
-	console.log('In generateSetString with', itemName, attributesObject);
 	return Object.keys(attributesObject).reduce((prev, curr)=> {
 		if (curr === 'type') { return prev; }
 		if (curr === 'assertionDate') { return prev; }
@@ -93,24 +92,23 @@ app.post('/assertions', (req, res)=> {
 		return res.status(400).json('Type required');
 	}
 
-	/* Create validation calls. Update the assertion to have an
-	identifier and to not have a type (which is not part of the node schema) */
-	const validations = assertions.map((item, index)=> {
-		const nodeData = {
-			...item,
-			identifier: assertions[index].identifier || uuidv4()
-		};
+	/* Create validation calls. Update the assertion to not
+	have a type (which is not part of the node schema) */
+	const validations = assertions.map((item)=> {
+		const nodeData = { ...item };
 		delete nodeData.type;
 		return schemaSpec.validate(item.type, nodeData);
 	});
 
 	return Promise.all(validations)
 	.then((data)=> {
-		/* Add the type back to the assertions. Add an assertionDate. */
+		/* Add the type back to the assertions and ensure an identifier is provided
+		or created. Add an assertionDate. */
 		const results = data.map((item, index)=> {
 			return {
 				...item,
 				type: assertions[index].type,
+				identifier: assertions[index].identifier || uuidv4(),
 				assertionDate: assertionDate,
 			};
 		});
@@ -121,7 +119,7 @@ app.post('/assertions', (req, res)=> {
 			const schemaProperties = schemaDef.properties;
 
 			/* Split the assertion attributes into those that will
-			generate attributes on a node and those that will create
+			create attributes on a node and those that will create
 			a relationship */
 			const attributes = {};
 			const relationships = {};
@@ -138,106 +136,71 @@ app.post('/assertions', (req, res)=> {
 
 			/* Create the cypher statement that will set all of the attributes to the node */
 			const attributeSetString = generateSetString(`item${index}`, attributes);
-			// const attributeSetString = attributes.reduce((prevString, currKey)=> {
-			// 	if (currKey === 'type') { return prevString; }
-			// 	if (currKey === 'assertionDate') { return prevString; }
-			// 	const commaSpot = prevString ? ',' : '';
-			// 	return `${prevString}${commaSpot} item${index}.${currKey} = "${currAssertion[currKey]}"`;
-			// }, '');
 
 			/* Create the cypher statement that will set all
 			of the relationships defined in the assertion */
 			const relationshipSetString = Object.keys(relationships).reduce((prevString, currKey)=> {
-				const relationshipType = schemaSpec._schemas[schemaProperties[currKey].items.identifierIsValid.type].schema.cypherLabels;
+				/* Set relationship destination node type. e.g. :Thing:Person */
+				const destinationNodeType = schemaSpec._schemas[schemaProperties[currKey].items.identifierIsValid.type].schema.cypherLabels;
 				let currString;
 
 				/* If there is an array of uuids, iterate over each to generate set statement
 				If there is only one uuid, simply create the set statement */
-
 				if (Array.isArray(relationships[currKey])) {
 					currString = relationships[currKey].reduce((prevKeyString, currKeyIdentifier, currKeyIndex)=> {
+						/* Generate set string params. e.g. 'item.date = 5, item.name="fish"' */
 						const setStringParameters = generateSetString(`r${currKeyIndex}`, currKeyIdentifier);
+						/* Generate set string itself. */
 						const setString = typeof currKeyIdentifier === 'string' || !setStringParameters
 							? ''
 							: `SET ${setStringParameters}`;
+
+						/* Get identifier of destination node */
 						const toIdentifier = typeof currKeyIdentifier === 'string'
 							? currKeyIdentifier
 							: currKeyIdentifier.identifier;
+
+						/* Compile setString with identifiers for cypher query */
 						return `${prevKeyString}
 							${prevKeyString ? 'WITH *' : ''}
-							MATCH (from${currKeyIndex}${schemaDef.cypherLabels} { identifier: '${currAssertion.identifier}' }),(to${currKeyIndex}${relationshipType} { identifier: '${toIdentifier}' })
+							MATCH (from${currKeyIndex}${schemaDef.cypherLabels} { identifier: '${currAssertion.identifier}' }),(to${currKeyIndex}${destinationNodeType} { identifier: '${toIdentifier}' })
 							MERGE (from${currKeyIndex})-[r${currKeyIndex}:${currKey}]->(to${currKeyIndex})
 							${setString}
 						`;
 					}, '');
 				} else {
+					/* Generate set string params. e.g. 'item.date = 5, item.name="fish"' */
 					const setStringParameters = generateSetString('r', relationships[currKey]);
+					/* Generate set string itself. */
 					const setString = typeof relationships[currKey] === 'string' || !setStringParameters
 						? ''
 						: `SET ${setStringParameters}`;
 					currString = `
-						MATCH (from${schemaDef.cypherLabels} { identifier: '${currAssertion.identifier}' }),(to${relationshipType} { identifier: '${currAssertion[currKey]}' })
+						MATCH (from${schemaDef.cypherLabels} { identifier: '${currAssertion.identifier}' }),(to${destinationNodeType} { identifier: '${currAssertion[currKey]}' })
 						MERGE (from)-[r:${currKey}]->(to)
 						${setString}
 					`;
 				}
-
-				console.log('**********');
-				console.log(currString);
-				// if (typeof currAssertion[currKey] === 'string') {
-				// 	currString = `
-				// 		MATCH (from${schemaDef.cypherLabels} { identifier: '${currAssertion.identifier}' }),(to${relationshipType} { identifier: '${currAssertion[currKey]}' })
-				// 		MERGE (from)-[r:${currKey}]->(to)
-				// 	`;
-				// } else if (typeof currAssertion[currKey] === 'object' && !Array.isArray(currAssertion[currKey])) {
-				// 	/* It is an object and not an array. */
-				// 	const destinationIdentifier = currAssertion[currKey].identifier;
-				// 	const relationshipPropertiesSetString = generateSetString('r', currAssertion[currKey]);
-				// 	// const relationshipPropertiesSetString = Object.keys(currAssertion[currKey]).reduce((prevRelationString, currRelationKey)=> {
-				// 	// 	if (currRelationKey === 'identifier') { return prevRelationString; }
-				// 	// 	const commaSpot = prevRelationString ? ',' : '';
-				// 	// 	return `${prevRelationString}${commaSpot} r.${currRelationKey} = "${currAssertion[currKey][currRelationKey]}"`;
-				// 	// }, '');
-				// 	currString = `
-				// 		MATCH (from${schemaDef.cypherLabels} { identifier: '${currAssertion.identifier}' }),(to${relationshipType} { identifier: '${destinationIdentifier}' })
-				// 		MERGE (from)-[r:${currKey}]->(to)
-				// 		SET ${relationshipPropertiesSetString}
-				// 	`;
-				// } else {
-				// 	currString = Object.keys(currAssertion[currKey]).reduce((prevKeyString, currKeyIdentifier, currKeyIndex)=> {
-				// 		if (currAssertion[currKey][currKeyIdentifier])
-				// 		return `${prevKeyString}
-				// 			${prevKeyString ? 'WITH *' : ''}
-				// 			MATCH (from${currKeyIndex}${schemaDef.cypherLabels} { identifier: '${currAssertion.identifier}' }),(to${currKeyIndex}${relationshipType} { identifier: '${currKeyIdentifier}' })
-				// 			MERGE (from${currKeyIndex})-[r${currKeyIndex}:${currKey}]->(to${currKeyIndex})
-				// 		`;
-				// 	}, '');
-				// }
 
 				return `${prevString}
 					${currString}
 				`;
 			}, '');
 
+			/* If there is an attributeSetString, generate the full cypher query */
+			const attributeMergeString = attributeSetString
+				? `MERGE (item${index}${schemaDef.cypherLabels} { identifier: "${currAssertion.identifier}" })
+					ON CREATE SET ${attributeSetString}
+					ON MATCH SET ${attributeSetString}`
+				: '';
+
 			return `${prev}
-				${attributeSetString
-					? `MERGE (item${index}${schemaDef.cypherLabels} { identifier: "${currAssertion.identifier}" })
-						ON CREATE SET ${attributeSetString}
-						ON MATCH SET ${attributeSetString}`
-					: ''
-				}
+				${attributeMergeString}
 				${attributeSetString && relationshipSetString ? 'WITH *' : ''}
 				${relationshipSetString}
 			`;
 		}, '');
-		// TODO: We don't have a clean way of deleting relationships (or at least marking them inactive)
-		// TODO: What if somebody submits an assertion providing their own identifier.
-		// At the moment, we'll just take it and create - but do we want to allow people
-		// to submit their own uuids?
 
-		console.log('------------');
-		console.log(cypherStatement);
-		console.log('============');
 		/* Return the results and run the cypher statement to update the graph db */
 		return Promise.all([results, graphSession.run(cypherStatement)]);
 	})

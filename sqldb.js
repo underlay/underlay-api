@@ -9,7 +9,8 @@ const passportLocalSequelize = require('passport-local-sequelize');
 const useSSL = process.env.DATABASE_URL.indexOf('localhost:') === -1;
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
 	logging: false,
-	dialectOptions: { ssl: useSSL }
+	dialectOptions: { ssl: useSSL },
+	operatorsAliases: Sequelize.Op,
 });
 
 // Change to true to update the model in the database.

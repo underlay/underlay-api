@@ -13,6 +13,16 @@ const cypherLabels = `${thingData.cypherLabels}:${schemaName}`;
 
 const properties = {
 	...thingData.properties,
+	associatedMedia: {
+		/* A media object that encodes this CreativeWork.
+		This property is a synonym for encoding. */
+		type: 'array',
+		uniqueItems: true,
+		items: {
+			type: ['string', 'object'],
+			identifierIsValid: { type: ['MediaObject'] }
+		}
+	},
 	author: {
 		/* The author of this content or rating. Please
 		note that author is special in that HTML 5

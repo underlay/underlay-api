@@ -2,6 +2,7 @@ import thingData from './Thing';
 import personData from './Person';
 import organizationData from './Organization';
 import creativeWorkData from './CreativeWork';
+import mediaObjectData from './MediaObject';
 
 function generateSchema(schemaData) {
 	return {
@@ -19,4 +20,5 @@ export default [
 	generateSchema(personData),
 	generateSchema(organizationData),
 	generateSchema(creativeWorkData),
+	generateSchema(mediaObjectData),
 ];

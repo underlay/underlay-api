@@ -183,6 +183,11 @@ which would return:
 ]
 ```
 
+#### Question about creating relationships to new objects
+I'm not sure the best way to handle the simultaneous creation of a node and a relationship. Say for example you want to create an entry for a book, a `CreativeWork`. You also at the same time want to upload a PDF of the book as a `MediaObject`. Finally, you want the `CreativeWork` to use the `associatedMedia` attribute to point to this new `MediaObject`. Because we check for existence of uuids on relation creation, we can't create the relation before the object. Do we handle this as the underlay? Or do we simply encourage people to file multiple assertions? One assertion to create the two objects, and another that uses the returned ids to create the relation. 
+
+I can see why this would be cumbersome for a server to keep track of these ids. But the alternative is that we internally keep track of them. Ideas welcome.
+
 ## Schemas
 
 Every node in an underlay can be described by one or more schemas. The used schemas use schema.org standards as a baseline. Unless otherwise noted, all submitted assertions and attributes must comply with the approved schema.org schemas. A list of functioning schemas in this Underlay are provided below:
@@ -191,3 +196,4 @@ Every node in an underlay can be described by one or more schemas. The used sche
 	- [Person](/schemas/Person.js)
 	- [Organization](/schemas/Organization.js)
 	- [Creative Work](/schemas/CreativeWork.js)
+		- [Media Object](/schemas/MediaObject.js)

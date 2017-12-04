@@ -190,4 +190,4 @@ Every node in an underlay can be described by one or more schemas. The used sche
 - [Thing](/schemas/Thing.js)
 	- [Person](/schemas/Person.js)
 	- [Organization](/schemas/Organization.js)
-	- [Creative Work](/schemas/Creative.js)
+	- [Creative Work](/schemas/CreativeWork.js)

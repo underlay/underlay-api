@@ -148,7 +148,9 @@ app.post('/assertions', (req, res)=> {
 			of the relationships defined in the assertion */
 			const relationshipSetString = Object.keys(relationships).reduce((prevString, currKey)=> {
 				/* Set relationship destination node type. e.g. :Thing:Person */
-				const destinationNodeType = schemaSpec._schemas[schemaProperties[currKey].items.identifierIsValid.type].schema.cypherLabels;
+				// TODO: Can we just always have the destination nodetype be :Thing since we validate the ids earlier?
+				// const destinationNodeType = schemaSpec._schemas[schemaProperties[currKey].items.identifierIsValid.type].schema.cypherLabels;
+				const destinationNodeType = ':Thing';
 				let currString;
 
 				/* If there is an array of uuids, iterate over each to generate set statement

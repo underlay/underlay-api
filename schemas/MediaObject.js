@@ -8,6 +8,8 @@ The used schema syntax is defined by JSON Schema: http://json-schema.org/
 ---------- */
 import creativeWorkData from './CreativeWork';
 
+// TODO: Test mediaObject with some creative works.
+
 const schemaName = 'MediaObject';
 const cypherLabels = `${creativeWorkData.cypherLabels}:${schemaName}`;
 

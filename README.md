@@ -14,12 +14,61 @@ An assertion can be made to:
 
 
 ## Minimal features
-- A POST route that accepts an Assertion.
-	- The route must fetch foreign URLs, store/cache the content contained locally, and replace any foreign URLs with a locally controlled URL. For example, a submitted URL, `http://www.untrustedsite.com/image.jpg` would be scraped, stored, and returned as `https://my-underlay-data.com/hashedfile.jpg`. We call this process 'amberization'.
-	- The route must verify that the assertion and it associated content are valid schema content.
-	- Invalid schema content must return an 400 error.
-	- If an Assertion is valid and succesfully amberized, the route should return the amberized assertion (i.e. the original assertion if no amberization is required) as a 201.
+- A POST route that accepts Assertions.
+	- The request sent to this route must contain three things: 1) authentication data, 2) an array with one or more assertions, 3) a webhook URI. See [#Example-POST-body](Example POST body).
+	- The authentication used to immediately authenticate the request. If authentication fails, a 401 Unauthorized is returned. If authentication succeeds, the array of assertions are staged for processing (through a task queue, or other architecture as determined by the underlay provider).
+	- Processing requires:
+		- Validating that the properties and relations provided are valid under the provided schema type.
+		- Validing that the identifier (if provided) does indeed exist.
+		- Fetch foreign assets, storing/caching the content contained locally, and replacing any foreign asset URLs with a locally controlled URL. For example, a submitted image, `http://www.untrustedsite.com/image.jpg` would be scraped, stored, and returned as `https://my-underlay-data.com/hashedfile.jpg`. We call this process 'amberization'.
+	- Processing an assertion can take a long time (>500ms). For this reason, the route is expected to be asynchronous. The route, upon receiving the assertion, authenticating, and staging assertions for processing returns a 202 Accepted with a requestId that will also be returned to the webhook.
+	- If processing finishes successfuly, a POST request is sent to the provided webhook URI. The POST request contains three keys (see [#Example-Webhook-body](Example Webhook body)):
+		- requestId: uuid matching the requestId provided in the 202 Accepted response.
+		- status: Either 'success' or 'failed'.
+		- error: If failed, the reason for failure, otherwise null.
+		- assertions: if successful, the list of amberized, timestamped, and identified assertions. Otherwise null.
+		
 - A GET route that allows one to query or download valid and accepted Assertions sent to the particular underlay.
+
+### Example POST body
+The following is a sample post:
+```javascript
+{
+	authentication: {
+		user: 'my-username',
+		key: 'my-api-key-12341234',
+	},
+	assertions: [{
+			type: 'Person',
+			name: 'Arnold Schwarzenegger',
+			image: 'https://my-images.com/arnold'
+	}],
+	webhookUri: 'https://api.my-service.com/assertionComplete'
+}
+```
+which would return a 202 Accepted with the following body:
+```javascript
+{
+	requestId: 33fe5817-d22f-2256-a95d-67b910527ca8
+}
+```
+
+### Example Webhook body
+The following is a sample body POSTed to the provided webhook URI:
+```javascript
+{
+	requestId: 33fe5817-d22f-2256-a95d-67b910527ca8,
+	status: 'success',
+	error: null,
+	assertions: [{
+		identifier: 'fc5b5817-dfff-4856-a93d-67b910528ecf',
+		type: 'Person',
+		name: 'Arnold Schwarzenegger',
+		image: 'https://underlaycdn.net/asndu1/sdjd831.jpg',
+		assertionDate: '2017-11-29T14:45:48+00:00'
+	}]
+}
+```
 
 ## Assertions
 Assertions are submitted as an array of JSON values. A single assertion must include a `type`. Valid types are listed below in the Schemas section. Assertions are used to create nodes within a graph. These nodes can have multiple schemas and the attributes associated with such schemas. A node must be created as a single schema. Once you have an identifier for a given node, you can specify additional schemas. 

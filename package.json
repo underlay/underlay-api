@@ -12,11 +12,13 @@
   "scripts": {
     "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon api.js"
+    "start": "nodemon api.js",
+    "worker": "nodemon runWorker.js"
   },
   "dependencies": {
     "ajv": "^6.0.0-rc.1",
     "ajv-async": "^0.1.1",
+    "amqplib": "^0.5.2",
     "aws-sdk": "^2.172.0",
     "babel-core": "^6.13.2",
     "babel-eslint": "^7.1.0",

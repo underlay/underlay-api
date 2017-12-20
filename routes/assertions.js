@@ -75,13 +75,7 @@ const schemaSpec = ajv.addKeyword('identifierIsValid', {
 .addKeyword('amberize', {
 	async: true,
 	validate: amberize
-});
-
-/* There is currently a bug that makes this not chainable.
-If accepted, we can chain this above. Follow this PR:
-https://github.com/epoberezkin/ajv/pull/640
-*/
-schemaSpec.addSchema(schemas);
+}).addSchema(schemas);
 
 app.post('/assertions', (req, res)=> {
 	console.time('PostAssertions');

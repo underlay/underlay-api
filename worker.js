@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign */
+/* eslint-disable max-len */
 /* eslint-disable global-require */
 import amqplib from 'amqplib';
 import Promise from 'bluebird';

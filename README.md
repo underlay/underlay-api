@@ -14,21 +14,20 @@ An assertion can be made to:
 
 
 ## Minimal features
+- A GET route that allows one to query or download valid and accepted Assertions sent to the particular underlay.
 - A POST route that accepts Assertions.
-	- The request sent to this route must contain three things: 1) authentication data, 2) an array with one or more assertions, 3) a webhook URI. See [#Example-POST-body](Example POST body).
-	- The authentication used to immediately authenticate the request. If authentication fails, a 401 Unauthorized is returned. If authentication succeeds, the array of assertions are staged for processing (through a task queue, or other architecture as determined by the underlay provider).
+	- The request sent to this route must contain three things: 1) authentication data, 2) an array with one or more assertions, 3) a webhook URI. See [Example POST body](#example-post-body).
+	- The authentication is used to authenticate the request. If authentication fails, a 401 Unauthorized is returned. If authentication succeeds, the array of assertions are staged for processing (through a task queue, or other architecture as determined by the underlay provider).
 	- Processing requires:
 		- Validating that the properties and relations provided are valid under the provided schema type.
 		- Validing that the identifier (if provided) does indeed exist.
-		- Fetch foreign assets, storing/caching the content contained locally, and replacing any foreign asset URLs with a locally controlled URL. For example, a submitted image, `http://www.untrustedsite.com/image.jpg` would be scraped, stored, and returned as `https://my-underlay-data.com/hashedfile.jpg`. We call this process 'amberization'.
-	- Processing an assertion can take a long time (>500ms). For this reason, the route is expected to be asynchronous. The route, upon receiving the assertion, authenticating, and staging assertions for processing returns a 202 Accepted with a requestId that will also be returned to the webhook.
-	- If processing finishes successfuly, a POST request is sent to the provided webhook URI. The POST request contains three keys (see [#Example-Webhook-body](Example Webhook body)):
-		- requestId: uuid matching the requestId provided in the 202 Accepted response.
+		- Fetching foreign assets, storing/caching the content contained locally, and replacing any foreign asset URLs with a locally controlled URL. For example, a submitted image, `http://www.untrustedsite.com/image.jpg` would be scraped, stored, and returned as `https://my-underlay-data.com/hashedfile.jpg`. We call this process 'amberization'.
+	- Processing an assertion can take a long time (>500ms). For this reason, the route is expected to be asynchronous. The route, upon receiving the request, authenticating, and staging assertions for processing returns a 202 Accepted with a requestId that will also be returned to the webhook URI.
+	- If processing finishes successfuly, a POST request is sent to the provided webhook URI. The POST request contains four keys (see [Example Webhook body](#example-webhook-body)):
+		- requestId: uuid matching the requestId provided in response to the intial request.
 		- status: Either 'success' or 'failed'.
 		- error: If failed, the reason for failure, otherwise null.
-		- assertions: if successful, the list of amberized, timestamped, and identified assertions. Otherwise null.
-		
-- A GET route that allows one to query or download valid and accepted Assertions sent to the particular underlay.
+		- assertions: If successful, the list of amberized, timestamped, and identified assertions. Otherwise null.
 
 ### Example POST body
 The following is a sample post:
@@ -39,17 +38,17 @@ The following is a sample post:
 		key: 'my-api-key-12341234',
 	},
 	assertions: [{
-			type: 'Person',
-			name: 'Arnold Schwarzenegger',
-			image: 'https://my-images.com/arnold'
+		type: 'Person',
+		name: 'Arnold Schwarzenegger',
+		image: 'https://my-images.com/arnold'
 	}],
-	webhookUri: 'https://api.my-service.com/assertionComplete'
+	webhookUri: 'https://api.my-service.com/assertionRequestComplete'
 }
 ```
 which would return a 202 Accepted with the following body:
 ```javascript
 {
-	requestId: 33fe5817-d22f-2256-a95d-67b910527ca8
+	requestId: '33fe5817-d22f-2256-a95d-67b910527ca8'
 }
 ```
 
@@ -57,7 +56,7 @@ which would return a 202 Accepted with the following body:
 The following is a sample body POSTed to the provided webhook URI:
 ```javascript
 {
-	requestId: 33fe5817-d22f-2256-a95d-67b910527ca8,
+	requestId: '33fe5817-d22f-2256-a95d-67b910527ca8',
 	status: 'success',
 	error: null,
 	assertions: [{

@@ -71,6 +71,8 @@ function generateSetString(itemName, attributesObject) {
 }
 
 function sendResultToWebhook(webhookUri, requestId, error, assertions) {
+	if (!webhookUri) { return null; }
+
 	return request({
 		uri: webhookUri,
 		method: 'POST',

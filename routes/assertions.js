@@ -3,12 +3,6 @@ import uuidv4 from 'uuid/v4';
 import app from '../server';
 import { addMessage } from '../messageQueue';
 
-/* This is just used for debugging locally */
-app.post('/completed', (req, res)=> {
-	console.log(JSON.stringify(req.body, null, 2));
-	return res.status(201).json('Webhook recieved data');
-});
-
 app.post('/assertions', (req, res)=> {
 	console.time('assertionRoute');
 	const authentication = req.body.authentication;
@@ -50,4 +44,10 @@ app.post('/assertions', (req, res)=> {
 	.finally(()=> {
 		console.timeEnd('assertionRoute');
 	});
+});
+
+/* This is just used for debugging webhooks locally */
+app.post('/completed', (req, res)=> {
+	console.log(JSON.stringify(req.body, null, 2));
+	return res.status(201).json('Webhook recieved data');
 });

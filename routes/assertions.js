@@ -10,6 +10,7 @@ app.post('/completed', (req, res)=> {
 });
 
 app.post('/assertions', (req, res)=> {
+	console.time('assertionRoute');
 	const authentication = req.body.authentication;
 	const assertions = req.body.assertions;
 	const webhookUri = req.body.webhookUri;
@@ -45,5 +46,8 @@ app.post('/assertions', (req, res)=> {
 	.catch((err)=> {
 		console.log('Error processing assertion request', err);
 		return res.status(500).json(err);
+	})
+	.finally(()=> {
+		console.timeEnd('assertionRoute');
 	});
 });

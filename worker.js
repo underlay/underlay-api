@@ -103,13 +103,14 @@ const schemaSpec = ajv.addKeyword('identifierIsValid', {
 
 function processTask(channel) {
 	return (msg)=> {
-		console.time('ProcessAssertions');
 		const body = JSON.parse(msg.content.toString());
 		const assertions = body.assertions;
 		const requestId = body.requestId;
 		const webhookUri = body.webhookUri;
 		const assertionDate = body.assertionDate;
-		console.log(' [x] Received ', requestId);
+
+		console.log(` [x] Received ${requestId}`);
+		console.time(` [x] Finished ${requestId}`);
 
 		/* Ensure that every assertion has a type value */
 		const allHaveType = assertions.reduce((prev, curr)=> {
@@ -249,19 +250,18 @@ function processTask(channel) {
 			return Promise.all([results, Assertion.bulkCreate(sequelizeObjects)]);
 		})
 		.then(([results])=> {
-			console.timeEnd('ProcessAssertions');
 			/* Return the processed assertions with a success status */
 			return sendResultToWebhook(webhookUri, requestId, null, results);
 		})
 		.catch((err)=> {
 			console.log('Error processing assertion', err);
 			if (err.message !== 'Webhook URI not available') {
-				console.timeEnd('ProcessAssertions');
 				return sendResultToWebhook(webhookUri, requestId, err, null);
 			}
+			return null;
 		})
 		.finally(()=> {
-			console.log(' [x] Done');
+			console.timeEnd(` [x] Finished ${requestId}`);
 			channel.ack(msg);
 		});
 	};

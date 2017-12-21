@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable max-len */
 /* eslint-disable global-require */
-import nr from 'newrelic';
+// import nr from 'newrelic';
 import amqplib from 'amqplib';
 import Promise from 'bluebird';
 import Ajv from 'ajv';
@@ -104,7 +104,7 @@ const schemaSpec = ajv.addKeyword('identifierIsValid', {
 
 function processTask(channel) {
 	return (msg)=> {
-		nr.startBackgroundTransaction('workerProcess', ()=> {
+		// nr.startBackgroundTransaction('workerProcess', ()=> {
 			const body = JSON.parse(msg.content.toString());
 			const assertions = body.assertions;
 			const requestId = body.requestId;
@@ -266,7 +266,7 @@ function processTask(channel) {
 				console.timeEnd(` [x] Finished ${requestId}`);
 				channel.ack(msg);
 			});
-		});
+		// });
 	};
 }
 

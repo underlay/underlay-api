@@ -8,7 +8,7 @@ const s3bucket = new AWS.S3({ params: { Bucket: 'www.underlaycdn.net' } });
 
 export default function amberizeFIle(fileUrl) {
 	const extension = fileUrl.split('.').pop();
-	const folderName = process.env.IS_PRODUCTION_API === 'TRUE'
+	const folderName = process.env.IS_PRODUCTION_API === 'true'
 		? crypto.randomBytes(4).toString('hex') // Produces 8 random characters
 		: '_testing';
 	const filename = `${crypto.randomBytes(4).toString('hex')}.${extension}`;

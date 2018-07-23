@@ -258,7 +258,8 @@ An unsigned assertion is a JSON-LD graph of the following form:
   "@graph": [
     {"/": "..."}, {"/": "..."}, ...
   ]
-}```
+}
+```
   
 A signed assertion would have the form:
   ```{
@@ -271,7 +272,8 @@ A signed assertion would have the form:
     "creator": "...",
     "signatureValue": "..."
   }
-}```
+}
+```
 
 So the value of `@graph` is an array of objects that have just one key (`"/"`) with a string value of the CID (~= self-describing hash https://github.com/ipld/cid) of another JSON-LD graph. By convention, *the first element `["@graph"][0]` is your “lowest-level” “payload” data*, and *every subsequent element describes the previous element’s provenance.*
 

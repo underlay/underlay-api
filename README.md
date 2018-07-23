@@ -275,17 +275,17 @@ A signed assertion would have the form:
 }
 ```
 
-So the value of `@graph` is an array of objects that have just one key (`"/"`) with a string value of the CID (~= self-describing hash https://github.com/ipld/cid) of another JSON-LD graph. By convention, *the first element `["@graph"][0]` is your “lowest-level” “payload” data*, and *every subsequent element describes the previous element’s provenance.*
+So the value of `@graph` is an array of objects that have just one key (`"/"`) with a string value of the CID (~= self-describing hash https://github.com/ipld/cid) of another JSON-LD graph. By convention, *the first element `["@graph"][0]` is your “lowest-level” “payload” data*, and every subsequent element describes the previous element’s provenance.
 
 This object `{"/": "..."}` is what Protocol are using as an “IPLD link”, which basically means that it’s what all their resolvers interpret as an external link to the outside IPLD world. So given the hash of an assertion, you could ask IPLD for “<hash>/@graph/0/foo” to get the `foo` property of the first element’s graph directly, wherever it happens to be.
 The remaining properties of the assertion object describe a signature (such as `GraphSignature`) as proposed in https://web-payments.org/vocabs/security.  These are nice because they describe how the signature gets inlined inside the data it’s signing, have a spec on how to generate and verify them, and are super extensible w/r/t algorithms. (`GraphSignature` in particular is supposed to canonicalize the graph before signing, so even different reorganizations of the same data would produce the same signature. Not a huge feature for us but kinda cool).
 So *tl;dr* is that an assertion is a JSON-LD “signature” object, as defined by a W3C community report, where the only property that gets signed is a single `@graph` array of IPLD links to other JSON-LD graphs, in ascending level of self-reference.
 
-''Why "IPLD Links"'':
+*Why "IPLD Links"*:
 - keeps the signature and assertion small
 - we get deduplication for free if you want to update provenance
 
-''Why the W3C Security report for signatures'':
+*Why the W3C Security report for signatures*:
 - a close existing standard, w/spec and conforming JS implementation @ https://github.com/digitalbazaar/jsonld-signatures
 - Lets us bring our own signature algorithms (e.g. can re-use the secp256k1 functions built-in to every IPFS node)
 - Includes time (signature-time)

@@ -258,7 +258,7 @@ An unsigned assertion is a JSON-LD graph of the following form:
   "@graph": [
     {"/": "..."}, {"/": "..."}, ...
   ]
-}'''
+}```
   
 A signed assertion would have the form:
   ```{
